@@ -24,7 +24,8 @@ auto_pytest_magic(
 
 def test_wrap_mode_interface():
     assert (
-        wrap_modes._wrap_mode_interface("statement", [], "", "", 80, [], "", "", True, True) == ""
+        wrap_modes._wrap_mode_interface("statement", [], "", "", 80, [], "", "", True, True, True)
+        == ""
     )
 
 

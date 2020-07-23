@@ -31,6 +31,7 @@ def import_statement(
         comment_prefix=config.comment_prefix,
         include_trailing_comma=config.include_trailing_comma,
         remove_comments=config.ignore_comments,
+        use_parentheses=config.use_parentheses,
     )
     if config.balanced_wrapping:
         lines = statement.split(line_separator)
@@ -54,6 +55,7 @@ def import_statement(
                 comment_prefix=config.comment_prefix,
                 include_trailing_comma=config.include_trailing_comma,
                 remove_comments=config.ignore_comments,
+                use_parentheses=config.use_parentheses,
             )
             lines = new_import_statement.split(line_separator)
     if statement.count(line_separator) == 0:

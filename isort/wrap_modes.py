@@ -27,6 +27,7 @@ def _wrap_mode_interface(
     comment_prefix: str,
     include_trailing_comma: bool,
     remove_comments: bool,
+    use_parentheses: bool,
 ) -> str:
     """Defines the common interface used by all wrap mode functions"""
     return ""
@@ -110,14 +111,27 @@ def vertical(**interface):
 def hanging_indent(**interface):
     if not interface["imports"]:
         return ""
+    if interface["use_parentheses"]:
+        _open_paren, _close_paren = "()"
+        _backslash = ""
+        _extra_chars = 1
+    else:
+        _open_paren, _close_paren = "", ""
+        _backslash = "\\"
+        _extra_chars = 3
+
+    def _overflows(line):
+        return len(line) + _extra_chars > interface["line_length"]
+
     next_import = interface["imports"].pop(0)
+    interface["statement"] += _open_paren
     next_statement = interface["statement"] + next_import
     # Check for first import
-    if len(next_statement) + 3 > interface["line_length"]:
+    if _overflows(next_statement):
         next_statement = (
             isort.comments.add_to_line(
                 interface["comments"],
-                f"{interface['statement']}\\",
+                f"{interface['statement']}{_backslash}",
                 removed=interface["remove_comments"],
                 comment_prefix=interface["comment_prefix"],
             )
@@ -133,14 +147,12 @@ def hanging_indent(**interface):
             removed=interface["remove_comments"],
             comment_prefix=interface["comment_prefix"],
         )
-        if (
-            len(next_statement.split(interface["line_separator"])[-1]) + 3
-            > interface["line_length"]
-        ):
+        current_line = next_statement.split(interface["line_separator"])[-1]
+        if _overflows(current_line):
             next_statement = (
                 isort.comments.add_to_line(
                     interface["comments"],
-                    f"{interface['statement']}, \\",
+                    f"{interface['statement']}, {_backslash}",
                     removed=interface["remove_comments"],
                     comment_prefix=interface["comment_prefix"],
                 )
@@ -148,7 +160,8 @@ def hanging_indent(**interface):
             )
             interface["comments"] = []
         interface["statement"] = next_statement
-    return interface["statement"]
+    _comma_maybe = "," if interface["include_trailing_comma"] else ""
+    return interface["statement"] + _comma_maybe + _close_paren
 
 
 @_wrap_mode
